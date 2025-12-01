@@ -29,15 +29,7 @@ const fetchProduct = async (index) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const productData = await response.json();
-    if (
-      productData &&
-      (productData.category === "men's clothing" ||
-        productData.category === "women's clothing")
-    ) {
-      Object.assign(state.product, productData);
-    } else {
-      Object.assign(state.product, initialProductState);
-    }
+    Object.assign(state.product, productData);
   } catch (err) {
     console.error("Error fetching product:", err.message);
     Object.assign(state.product, initialProductState);
@@ -46,9 +38,9 @@ const fetchProduct = async (index) => {
   }
 };
 
-const nextProduct = () => {
+const nextProduct = async () => {
   state.currentIndex = state.currentIndex < 20 ? state.currentIndex + 1 : 1;
-  fetchProduct(state.currentIndex);
+  await fetchProduct(state.currentIndex);
 };
 
 const updateBodyBackground = () => {
@@ -59,6 +51,9 @@ const updateBodyBackground = () => {
   } else if (state.product.category === "men's clothing") {
     body.style.background =
       "linear-gradient(to bottom, var(--man-background-color) 70%, var(--white-color) 30%)";
+  } else {
+    body.style.background =
+      "linear-gradient(to bottom, var(--unvailable-background-color) 70%, var(--white-color) 30%)";
   }
 };
 
@@ -95,7 +90,9 @@ watch(
     <ProductUnavailable
       v-if="
         !isLoading.value &&
-        (!state.product.category || state.product.category === '')
+        state.product &&
+        state.product.category !== 'men\'s clothing' &&
+        state.product.category !== 'women\'s clothing'
       "
       @next="nextProduct"
     />
